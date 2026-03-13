@@ -24,7 +24,7 @@
         .logo-text span.text-red { color: var(--primary); }
         .nav-menu { display: flex; gap: 2rem; list-style: none; }
         .nav-link { text-decoration: none; color: var(--neutral-800); font-weight: 500; }
-        .btn { padding: 0.5rem 1.2rem; border-radius: 40px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.6rem; transition: 0.2s; }
+        .btn { padding: 0.5rem 1.2rem; border-radius: 40px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.6rem; transition: 0.2s; cursor: pointer; border: none; font-size: 1rem; }
         .btn-primary { background: var(--primary); color: white; border: 1px solid var(--primary); }
         .btn-outline { border: 1px solid var(--primary); color: var(--primary); background: transparent; }
 
@@ -73,7 +73,8 @@
         .process-card h4 { font-weight: 700; margin-bottom: 0.5rem; }
         .process-card p { color: #395c7c; font-size: 0.95rem; }
 
-        .dashboard-peek { background: #f8fbff; border-radius: 40px; padding: 2rem; color: white; margin: 4rem 0; }
+        .dashboard-peek { background: #f8fbff; border-radius: 40px; padding: 2rem; margin: 4rem 0; }
+        .dashboard-image { width: 100%; border-radius: 24px; border: 1px solid #cbdae9; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.15); display: block; }
         .footer { background: #0f172a; color: white; padding: 3rem 0; margin-top: 4rem; }
 
         /* Logo */
@@ -112,38 +113,100 @@
             .logo-text { font-size: 1.3rem; }
         }
 
-        /* image placeholder background (gray while images load) */
         img {
             background: #d1ddee;
             display: block;
         }
 
         .hero-image-placeholder {
-    width: 100%;
-    height: 100%;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
 
-.hero-image-placeholder img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+        .hero-image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* simple camera modal style */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .camera-card {
+            max-width: 600px;
+            width: 90%;
+            background: #0b1f33;
+            border-radius: 48px;
+            padding: 1.5rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            border: 2px solid var(--primary);
+        }
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .camera-header h3 {
+            font-weight: 600; display: flex; gap: 0.5rem;
+        }
+        #closeCamera {
+            background: transparent;
+            border: none;
+            color: #ffb4b4;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        #cameraFeed {
+            width: 100%;
+            border-radius: 32px;
+            background: #1f3a57;
+            min-height: 300px;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            transform: scaleX(-1);  /* mirror for selfie convenience */
+        }
+        .camera-placeholder {
+            background: #102b3f;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            min-height: 300px;
+            border: 2px dashed var(--primary);
+            font-size: 1.2rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .mock-scan-line {
+            width: 80%; height: 4px; background: var(--primary); opacity: 0.7; animation: scan 2s infinite;
+        }
+        @keyframes scan { 0% { transform: translateY(-30px); } 50% { transform: translateY(30px); } }
+        .permission-hint { color: #aaa; font-size: 0.9rem; margin-top: 1rem; }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="container">
             <nav class="navbar">
-
-                <!--
-                git config --global user.email "kingtshepang020@gmail.com"
-  git config --global user.name "Tshepang95"
-                -->
                 <a href="/" class="logo">
-                    <img src="/assets/livestockpulseA.png" alt="LivestockShield logo" class="logo-img">
+                    <!-- local placeholder if image missing; using inline background colour; keep alt -->
+                    <img src="/assets/livestockpulseA.png" alt="LivestockShield logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="display:block;">
+                    <span class="logo-text" style="display:none;">🐄</span>
                     <span class="logo-text">Livestock<span class="text-red">pulseSA</span></span>
                 </a>
                 <ul class="nav-menu">
@@ -152,19 +215,37 @@
                     <li><a href="dashbaord.html" class="nav-link">Dashboard</a></li>
                 </ul>
                 <div class="nav-actions">
-                    <a href="#" class="btn btn-outline"><i class="fas fa-qrcode"></i> Scan demo</a>
+                    <!-- SCAN DEMO button triggers camera -->
+                    <button id="scanDemoBtn" class="btn btn-outline"><i class="fas fa-qrcode"></i> Scan demo</button>
                     <a href="#" class="btn btn-primary">Partner</a>
                 </div>
             </nav>
         </div>
     </header>
 
+    <!-- camera modal -->
+    <div id="cameraModal" class="camera-modal">
+        <div class="camera-card">
+            <div class="camera-header">
+                <h3><i class="fas fa-qrcode" style="color:var(--primary);"></i> FMD status scanner · point at QR ear tag</h3>
+                <button id="closeCamera">&times;</button>
+            </div>
+            <!-- video element (actual camera) -->
+            <video id="cameraFeed" autoplay playsinline style="display: none;"></video>
+            <!-- fallback placeholder (shown until stream starts or on error) -->
+            <div id="cameraPlaceholder" class="camera-placeholder">
+                <i class="fas fa-camera" style="font-size: 4rem; opacity: 0.6;"></i>
+                <div class="mock-scan-line"></div>
+                <span>waiting for camera …</span>
+            </div>
+            <p class="permission-hint"><i class="fas fa-info-circle"></i> This demo simulates scanning a QR code; after access is granted, camera feed will appear (mirrored). In production, QR detection would read FMD‑negative status.</p>
+        </div>
+    </div>
+
     <main>
-        <!-- HERO section with image placeholders -->
         <section class="hero">
             <div class="container">
                 <div class="hero-grid">
-                    <!-- LEFT text -->
                     <div class="hero-content" data-aos="fade-right">
                         <div class="hero-badge"><span class="badge-pulse"></span> National FMD programme · QR-tagged</div>
                         <h1 class="hero-title">From ear tag to national dashboard: <span class="text-gradient-red">proven FMD‑negative</span> by QR identity</h1>
@@ -175,7 +256,7 @@
                             <div class="stat-item"><span class="stat-value">24h</span><span class="stat-label">trace complete</span></div>
                         </div>
                         <div class="hero-cta">
-                            <a href="#" class="btn btn-primary btn-large"><i class="fas fa-qrcode"></i> See QR tag in action</a>
+                            <button id="heroScanBtn" class="btn btn-primary btn-large"><i class="fas fa-qrcode"></i> See QR tag in action</button>
                             <a href="#" class="btn btn-outline btn-large">How it works</a>
                         </div>
                         <div style="display: flex; gap: 1.2rem; margin-top: 1.8rem;">
@@ -183,80 +264,61 @@
                             <span><i class="fas fa-check-circle" style="color:#117f3a;"></i> DALRRD ready</span>
                         </div>
                     </div>
-
-                    <!-- RIGHT visual with step images -->
                     <div class="hero-visual" data-aos="fade-left">
-    
-                        <!-- Image Placeholder -->
                         <div class="hero-image-placeholder">
-                            <img src="/assets/IMG-20260309-WA0005.jpg" alt="Hero visual placeholder">
+                            <img src="/assets/IMG-20260309-WA0005.jpg" alt="Hero visual placeholder" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22400%22%20viewBox%3D%220%200%20600%20400%22%3E%3Crect%20width%3D%22600%22%20height%3D%22400%22%20fill%3D%22%23bc1c2e22%22%2F%3E%3Ctext%20x%3D%2230%22%20y%3D%22200%22%20font-family%3D%22Inter%22%20font-size%3D%2224%22%20fill%3D%22%239f1626%22%3E📸%20QR%20tag%20scan%20visual%3C%2Ftext%3E%3C%2Fsvg%3E';">
                         </div>
-
                     </div>
-
-
                 </div>
             </div>
         </section>
 
-        <!-- process grid with image placeholders -->
+        <!-- process grid ... (unchanged, keep as is) -->
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">national digital livestock ecosystem</span>
                 <h2 class="subsection-title">QR‑code identification from farm to export</h2>
             </div>
-
             <div class="process-grid">
                 <div class="process-card">
                     <div class="process-icon">
-                        <img src="/assets/qrcode.jpg" alt="QR ear tag" style="width:100%; height:100%; object-fit:cover; border-radius:30px;">
+                        <img src="/assets/qrcode.jpg" alt="QR ear tag" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E📱%3C%2Ftext%3E%3C%2Fsvg%3E';">
                     </div>
                     <h4>1. QR ear tag</h4>
                     <p>Unique ID per bovine, weather-resistant, tamper‑proof, scanned via smartphone.</p>
                 </div>
                 <div class="process-card">
                     <div class="process-icon">
-                        <img src="/assets/Cattle-vaccination-c-AdobeStock_289582852-web-1024x577.jpg" alt="Vaccination registry" style="width:100%; height:100%; object-fit:cover; border-radius:30px;">
+                        <img src="/assets/Cattle-vaccination-c-AdobeStock_289582852-web-1024x577.jpg" alt="Vaccination registry" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E💉%3C%2Ftext%3E%3C%2Fsvg%3E';">
                     </div>
                     <h4>2. Vaccination registry</h4>
                     <p>Vaccine batch, vet ID, booster schedule — all linked to QR.</p>
                 </div>
                 <div class="process-card">
                     <div class="process-icon">
-                        <img src="/assets/negative.jpg" alt="Daily health check" style="width:100%; height:100%; object-fit:cover; border-radius:30px;">
+                        <img src="/assets/negative.jpg" alt="Daily health check" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E🐄%3C%2Ftext%3E%3C%2Fsvg%3E';">
                     </div>
                     <h4>3. Daily health check</h4>
                     <p>Farmer scans & submits symptoms (photos, mobility) → early alert.</p>
                 </div>
                 <div class="process-card">
                     <div class="process-icon">
-                        <img src="/assets/negative.jpg" alt="Movement scan" style="width:100%; height:100%; object-fit:cover; border-radius:30px;">
+                        <img src="/assets/negative.jpg" alt="Movement scan" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E🚛%3C%2Ftext%3E%3C%2Fsvg%3E';">
                     </div>
                     <h4>4. Movement scan</h4>
                     <p>Auctions, abattoirs, transport — scan logs location, prevents non‑compliant moves.</p>
                 </div>
             </div>
+        </div>
 
-            <div style="background: white; border-radius: 40px; padding: 2rem; margin: 2rem 0;">
-                <h3 style="font-size: 1.8rem; margin-bottom: 1rem;"><i class="fas fa-qrcode" style="color:var(--primary);"></i> How the QR code proves FMD‑negative</h3>
-                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-                    <div style="flex:1; min-width: 200px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> <strong>Vaccination timestamp</strong> – date, place, vet credentials</div>
-                    <div style="flex:1; min-width: 200px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> <strong>Booster compliance</strong> – system prevents expiry</div>
-                    <div style="flex:1; min-width: 200px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> <strong>No clinical signs</strong> – daily farmer reports attached</div>
-                    <div style="flex:1; min-width: 200px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> <strong>Export eligibility</strong> – automatically generated certificate</div>
-                </div>
+        <!-- dashboard image -->
+        <div class="container">
+            <div class="dashboard-peek">
+                <img src="/assets/IMG_20260309_130845.jpg" alt="FMD Dashboard Preview" class="dashboard-image" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22800%22%20height%3D%22300%22%20viewBox%3D%220%200%20800%20300%22%3E%3Crect%20width%3D%22800%22%20height%3D%22300%22%20fill%3D%22%231b3b4f%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%22160%22%20font-family%3D%22Inter%22%20font-size%3D%2228%22%20fill%3D%22%23fff%22%3E📊%20FMD%20DASHBOARD%20PREVIEW%3C%2Ftext%3E%3C%2Fsvg%3E';">
             </div>
         </div>
 
-        <!-- dashboard peek (with optional image) -->
-        <!-- dashboard image -->
-<div class="container">
-    <div class="dashboard-peek">
-        <img src="/assets/IMG_20260309_130845.jpg" alt="FMD Dashboard Preview" class="dashboard-image">
-    </div>
-</div>
-
-        <!-- roadmap & contact unchanged (keep original) -->
+        <!-- rest of content (unchanged) -->
         <div class="container" style="text-align:center; margin: 4rem auto;">
             <span class="section-tag">from pilot to national scale</span>
             <h2 class="subsection-title">QR-code vaccination roll‑out</h2>
@@ -285,7 +347,6 @@
             </div>
         </div>
 
-        <!-- footer -->
         <footer class="footer">
             <div class="container">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
@@ -308,21 +369,98 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
+        // mini map (same as original)
         document.addEventListener('DOMContentLoaded', function() {
             const mapEl = document.getElementById('miniLivestockMap');
-            if (!mapEl) return;
-            const map = L.map(mapEl, { center: [-28.4793, 24.6986], zoom: 5, zoomControl: false, attributionControl: false, scrollWheelZoom: false });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-            const farms = [
-                { lat: -25.7689, lng: 29.4648 }, { lat: -28.2308, lng: 28.3073 },
-                { lat: -26.9569, lng: 24.7284 }, { lat: -23.9045, lng: 29.4688 }
-            ];
-            farms.forEach(f => {
-                L.marker([f.lat, f.lng], {
-                    icon: L.divIcon({ className: 'custom-marker', html: '<div style="background:#bc1c2e; width:12px; height:12px; border-radius:50%; border:2px solid white;"></div>', iconSize: [12,12] })
-                }).addTo(map);
+            if (mapEl) {
+                const map = L.map(mapEl, { center: [-28.4793, 24.6986], zoom: 5, zoomControl: false, attributionControl: false, scrollWheelZoom: false });
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+                const farms = [ { lat: -25.7689, lng: 29.4648 }, { lat: -28.2308, lng: 28.3073 }, { lat: -26.9569, lng: 24.7284 }, { lat: -23.9045, lng: 29.4688 } ];
+                farms.forEach(f => {
+                    L.marker([f.lat, f.lng], {
+                        icon: L.divIcon({ className: 'custom-marker', html: '<div style="background:#bc1c2e; width:12px; height:12px; border-radius:50%; border:2px solid white;"></div>', iconSize: [12,12] })
+                    }).addTo(map);
+                });
+            }
+        });
+
+        // ---------- CAMERA LOGIC ----------
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('cameraFeed');
+        const placeholder = document.getElementById('cameraPlaceholder');
+        const closeBtn = document.getElementById('closeCamera');
+        const scanButtons = [document.getElementById('scanDemoBtn'), document.getElementById('heroScanBtn')];
+
+        let stream = null;
+
+        function stopStream() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function showCamera() {
+            modal.style.display = 'flex';
+            video.style.display = 'none';
+            placeholder.style.display = 'flex';  // show placeholder while starting
+
+            // request camera
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }) // use back camera if available
+                .then(mediaStream => {
+                    stream = mediaStream;
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play().then(() => {
+                            // hide placeholder, show video
+                            placeholder.style.display = 'none';
+                            video.style.display = 'block';
+                        }).catch(e => {
+                            placeholder.innerHTML = `<i class="fas fa-exclamation-triangle"></i> could not play video`;
+                        });
+                    };
+                })
+                .catch(err => {
+                    console.warn('Camera error:', err);
+                    placeholder.innerHTML = `
+                        <i class="fas fa-exclamation-triangle" style="font-size:3rem;"></i>
+                        <span>Camera access denied or not available.</span>
+                        <span style="font-size:0.9rem;">(simulated demo — in real app QR would be detected)</span>
+                    `;
+                    // Keep placeholder visible with message
+                });
+        }
+
+        function hideCamera() {
+            modal.style.display = 'none';
+            stopStream();
+            // reset placeholder for next time
+            placeholder.innerHTML = `
+                <i class="fas fa-camera" style="font-size: 4rem; opacity: 0.6;"></i>
+                <div class="mock-scan-line"></div>
+                <span>waiting for camera …</span>
+            `;
+            placeholder.style.display = 'flex';
+            video.style.display = 'none';
+        }
+
+        // event listeners for both buttons
+        scanButtons.forEach(btn => {
+            if (btn) btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showCamera();
             });
         });
+
+        closeBtn.addEventListener('click', hideCamera);
+
+        // click outside modal? optional: close if click on background
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideCamera();
+        });
+
+        // cleanup on page unload
+        window.addEventListener('beforeunload', stopStream);
     </script>
 </body>
 </html>

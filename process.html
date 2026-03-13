@@ -3,307 +3,464 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FMD QR Process · Livestock vaccination workflow</title>
-    <!-- Fonts, Icons, AOS -->
+    <title>National QR Livestock · FMD‑negative digital IDs</title>
+    <!-- Fonts, Icons, AOS, Leaflet -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f4f8fd; color: #0b1a2a; line-height: 1.5; }
+        body { font-family: 'Inter', sans-serif; background: #f4f7fc; color: #0b1a2a; line-height: 1.5; }
         :root { --primary: #bc1c2e; --primary-dark: #9f1626; --success: #117f3a; --warning: #b85e00; --info: #2563eb; --neutral-900: #0f172a; --neutral-800: #1e293b; --gray-200: #e9edf2; }
         .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
 
-        /* header (same as index/dashboard) */
+        /* header */
         .header { position: fixed; width: 100%; top: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .navbar { display: flex; justify-content: space-between; align-items: center; height: 80px; }
-        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
-        .logo-img { height: 70px; width: auto; border-radius: 8px; }
-        .logo-text { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
-        .logo-text .text-red { color: var(--primary); }
+        
+        .logo-text span.text-red { color: var(--primary); }
         .nav-menu { display: flex; gap: 2rem; list-style: none; }
         .nav-link { text-decoration: none; color: var(--neutral-800); font-weight: 500; }
-        .btn { padding: 0.5rem 1.2rem; border-radius: 40px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.6rem; transition: 0.2s; }
+        .btn { padding: 0.5rem 1.2rem; border-radius: 40px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.6rem; transition: 0.2s; cursor: pointer; border: none; font-size: 1rem; }
         .btn-primary { background: var(--primary); color: white; border: 1px solid var(--primary); }
         .btn-outline { border: 1px solid var(--primary); color: var(--primary); background: transparent; }
 
-        /* page header */
-        .process-header { padding: 130px 0 40px; text-align: center; background: linear-gradient(165deg, #ffffff 0%, #f0f5fa 100%); }
-        .process-header h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
-        .process-header .lead { font-size: 1.2rem; color: #2d3c4b; max-width: 700px; margin: 0 auto; }
+        /* HERO */
+        .hero { position: relative; padding: 130px 0 70px; background: linear-gradient(165deg, #ffffff 0%, #f0f5fa 100%); overflow: hidden; }
+        .hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: start; }
+        .hero-badge { display: inline-flex; background: rgba(188,28,46,0.08); padding: 0.4rem 1.2rem; border-radius: 40px; color: var(--primary-dark); font-weight: 600; margin-bottom: 1.5rem; border: 1px solid rgba(188,28,46,0.15); }
+        .badge-pulse { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; margin-right: 0.6rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+        .hero-title { font-size: 3.2rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; color: #0b1a2a; }
+        .text-gradient-red { background: linear-gradient(145deg, #bc1c2e, #8e1422); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-description { font-size: 1.2rem; color: #2d3c4b; max-width: 90%; margin: 1.5rem 0 2rem; }
+        .stat-banner { display: flex; gap: 2rem; background: white; border-radius: 60px; padding: 1rem 2rem; box-shadow: 0 10px 20px -10px rgba(0,0,0,0.1); width: fit-content; margin: 2rem 0; border: 1px solid #dfe7ef; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #0f172a; }
+        .stat-label { color: #475569; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* timeline style */
-        .process-timeline { padding: 4rem 0; }
-        .timeline-grid { display: flex; flex-direction: column; gap: 2.5rem; max-width: 900px; margin: 0 auto; }
-        .timeline-item { display: flex; gap: 2rem; background: white; border-radius: 60px; padding: 2rem; box-shadow: 0 20px 30px -20px rgba(0,0,0,0.1); border: 1px solid #deecf5; }
-        .timeline-number { width: 70px; height: 70px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; flex-shrink: 0; }
-        .timeline-content { flex: 1; }
-        .timeline-content h3 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-        .badge { background: rgba(188,28,46,0.1); color: var(--primary-dark); padding: 0.2rem 1rem; border-radius: 60px; font-size: 0.8rem; font-weight: 600; }
-        .timeline-content p { color: #2e4960; margin: 0.8rem 0 1rem; font-size: 1.1rem; }
-        .feature-list { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1.2rem 0; }
-        .feature-list span { background: #f1f6fb; padding: 0.3rem 1rem; border-radius: 40px; font-size: 0.9rem; font-weight: 500; }
-        .feature-list i { color: var(--success); margin-right: 0.3rem; }
+        /* QR step visual card */
+        .visual-card { background: white; border-radius: 40px; box-shadow: 0 30px 50px -25px rgba(0,40,80,0.3); padding: 2rem; border: 1px solid rgba(188,28,46,0.1); position: relative; }
+        .qr-step-ribbon { position: absolute; top: -12px; left: 30px; background: var(--primary); color: white; padding: 0.4rem 1.4rem; border-radius: 40px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 8px 14px rgba(188,28,46,0.3); }
+        .step-visual-flow { display: flex; flex-direction: column; gap: 1.8rem; margin-top: 1.5rem; }
+        .step-item { display: flex; align-items: center; gap: 1.2rem; background: #f9fcff; padding: 1rem 1.5rem; border-radius: 100px; border: 1px solid #dee7f0; transition: all 0.2s; }
+        /* image placeholder inside step icon */
+        .step-item .step-icon { width: 56px; height: 56px; background: #f1f6fb; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #e2ebf6; }
+        .step-item .step-content h4 { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 0.3rem; }
+        .step-content .badge-success { background: #e0f2e9; color: #0a7143; padding: 0.2rem 0.8rem; border-radius: 40px; font-size: 0.7rem; font-weight: 700; margin-left: 0.5rem; }
+        .step-content p { color: #2f4b6e; margin-top: 0.2rem; font-size: 0.95rem; }
+        .qr-tag-preview { display: flex; align-items: center; gap: 1.5rem; background: #0b1f33; color: white; border-radius: 80px; padding: 0.8rem 1.8rem; margin-top: 0.5rem; border: 2px solid white; box-shadow: 0 14px 24px -8px black; }
+        .qr-tag-preview i { font-size: 2.6rem; color: white; background: #1f3a57; padding: 0.5rem; border-radius: 20px; }
+        .qr-tag-preview .tag-detail span { font-size: 0.8rem; opacity: 0.7; }
+        .qr-tag-preview .tag-detail strong { font-size: 1.2rem; font-weight: 700; display: flex; gap: 0.8rem; align-items: center; }
+        .status-negative { background: #00a86b; color: white; padding: 0.2rem 0.9rem; border-radius: 60px; font-size: 0.8rem; font-weight: 700; margin-left: 0.5rem; }
 
-        /* image placeholder row */
-        .step-visual { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
-        .visual-thumb { width: 80px; height: 80px; background: #dbe5f0; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.7rem; text-align: center; border: 1px solid #cbdae9; }
+        /* mini map */
+        .map-mini-container { margin-top: 2rem; border-radius: 28px; overflow: hidden; border: 1px solid #d4e0ec; background: #14283c; height: 140px; position: relative; }
+        #miniLivestockMap { width: 100%; height: 100%; z-index: 1; }
+        .map-badge { position: absolute; bottom: 8px; left: 12px; background: rgba(0,0,0,0.6); color: white; font-size: 0.7rem; padding: 0.2rem 0.8rem; border-radius: 40px; backdrop-filter: blur(4px); z-index: 10; }
 
-        /* sub process cards */
-        .sub-process-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.8rem; margin: 4rem 0; }
-        .sub-card { background: white; border-radius: 32px; padding: 2rem 1.5rem; border: 1px solid #e2ebf6; box-shadow: 0 12px 24px -16px rgba(0,0,0,0.1); }
-        .sub-icon { width: 70px; height: 70px; background: #f1f6fb; border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary); margin-bottom: 1.5rem; overflow: hidden; }
-        .sub-card h4 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .sub-card p { color: #395c7c; }
+        /* process grid */
+        .section-header { text-align: center; margin: 4rem 0 3rem; }
+        .section-tag { background: rgba(188,28,46,0.08); color: var(--primary-dark); padding: 0.3rem 1rem; border-radius: 60px; font-weight: 600; font-size: 0.9rem; }
+        .subsection-title { font-size: 2rem; font-weight: 700; margin: 1rem 0 1.5rem; }
+        .process-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.5rem; margin: 3rem 0; }
+        .process-card { background: white; border-radius: 32px; padding: 1.8rem 1.2rem; box-shadow: 0 12px 24px -16px rgba(0,0,0,0.1); border: 1px solid #deecf5; }
+        .process-icon { width: 70px; height: 70px; background: #f1f6fb; border-radius: 30px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 1.5rem; }
+        .process-card h4 { font-weight: 700; margin-bottom: 0.5rem; }
+        .process-card p { color: #395c7c; font-size: 0.95rem; }
 
-        /* how it works banner */
-        .how-it-works { background: #0e2237; border-radius: 60px; padding: 3rem; color: white; margin: 4rem 0; }
-        .how-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; text-align: center; }
-        .how-item i { font-size: 2.5rem; color: var(--primary); background: #1b334b; padding: 1rem; border-radius: 50%; margin-bottom: 1rem; }
-        .how-item h4 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; }
-        .how-item p { color: #9db7d4; }
-
+        .dashboard-peek { background: #f8fbff; border-radius: 40px; padding: 2rem; margin: 4rem 0; }
+        .dashboard-image { width: 100%; border-radius: 24px; border: 1px solid #cbdae9; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.15); display: block; }
         .footer { background: #0f172a; color: white; padding: 3rem 0; margin-top: 4rem; }
-        @media (max-width:700px) { .timeline-item { flex-direction: column; align-items: flex-start; } .how-grid { grid-template-columns: 1fr; } }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+        .logo-img {
+            height: 80px;
+            width: auto;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+        .logo:hover .logo-img {
+            transform: scale(1.05);
+        }
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+        .logo-text .text-red {
+            color: #bc1c2e;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+        @media (max-width: 640px) {
+            .logo-img { height: 50px; }
+            .logo-text { font-size: 1.3rem; }
+        }
+
+        img {
+            background: #d1ddee;
+            display: block;
+        }
+
+        .hero-image-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .hero-image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* simple camera modal style */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .camera-card {
+            max-width: 600px;
+            width: 90%;
+            background: #0b1f33;
+            border-radius: 48px;
+            padding: 1.5rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            border: 2px solid var(--primary);
+        }
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .camera-header h3 {
+            font-weight: 600; display: flex; gap: 0.5rem;
+        }
+        #closeCamera {
+            background: transparent;
+            border: none;
+            color: #ffb4b4;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        #cameraFeed {
+            width: 100%;
+            border-radius: 32px;
+            background: #1f3a57;
+            min-height: 300px;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            transform: scaleX(-1);  /* mirror for selfie convenience */
+        }
+        .camera-placeholder {
+            background: #102b3f;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            min-height: 300px;
+            border: 2px dashed var(--primary);
+            font-size: 1.2rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .mock-scan-line {
+            width: 80%; height: 4px; background: var(--primary); opacity: 0.7; animation: scan 2s infinite;
+        }
+        @keyframes scan { 0% { transform: translateY(-30px); } 50% { transform: translateY(30px); } }
+        .permission-hint { color: #aaa; font-size: 0.9rem; margin-top: 1rem; }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="container">
             <nav class="navbar">
-                <a href="index.html" class="logo">
-                    <img src="/assets/livestockpulseA.png" alt="LivestockShield" class="logo-img">
+                <a href="/" class="logo">
+                    <!-- local placeholder if image missing; using inline background colour; keep alt -->
+                    <img src="/assets/livestockpulseA.png" alt="LivestockShield logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="display:block;">
+                    <span class="logo-text" style="display:none;">🐄</span>
                     <span class="logo-text">Livestock<span class="text-red">pulseSA</span></span>
                 </a>
                 <ul class="nav-menu">
-                    <li><a href="index.html" class="nav-link">Home</a></li>
-                    <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                    <li><a href="index.html" class="nav-link">Vision</a></li>
                     <li><a href="process.html" class="nav-link">Process</a></li>
+                    <li><a href="dashbaord.html" class="nav-link">Dashboard</a></li>
                 </ul>
                 <div class="nav-actions">
-                    <a href="#" class="btn btn-outline"><i class="fas fa-qrcode"></i> Scan demo</a>
+                    <!-- SCAN DEMO button triggers camera -->
+                    <button id="scanDemoBtn" class="btn btn-outline"><i class="fas fa-qrcode"></i> Scan demo</button>
                     <a href="#" class="btn btn-primary">Partner</a>
                 </div>
             </nav>
         </div>
     </header>
 
+    <!-- camera modal -->
+    <div id="cameraModal" class="camera-modal">
+        <div class="camera-card">
+            <div class="camera-header">
+                <h3><i class="fas fa-qrcode" style="color:var(--primary);"></i> FMD status scanner · point at QR ear tag</h3>
+                <button id="closeCamera">&times;</button>
+            </div>
+            <!-- video element (actual camera) -->
+            <video id="cameraFeed" autoplay playsinline style="display: none;"></video>
+            <!-- fallback placeholder (shown until stream starts or on error) -->
+            <div id="cameraPlaceholder" class="camera-placeholder">
+                <i class="fas fa-camera" style="font-size: 4rem; opacity: 0.6;"></i>
+                <div class="mock-scan-line"></div>
+                <span>waiting for camera …</span>
+            </div>
+            <p class="permission-hint"><i class="fas fa-info-circle"></i> This demo simulates scanning a QR code; after access is granted, camera feed will appear (mirrored). In production, QR detection would read FMD‑negative status.</p>
+        </div>
+    </div>
+
     <main>
-        <!-- page title -->
-        <section class="process-header">
+        <section class="hero">
             <div class="container">
-                <span class="badge" style="background: rgba(188,28,46,0.08); padding:0.4rem 1.2rem;">end‑to‑end workflow</span>
-                <h1>From vaccination to verified FMD‑negative</h1>
-                <p class="lead">Every animal gets a unique QR‑coded ear tag, creating a digital health record that follows it from farm to export.</p>
-            </div>
-        </section>
-
-        <!-- main timeline (big steps) -->
-        <section class="process-timeline">
-            <div class="container">
-                <div class="timeline-grid">
-                    <!-- step 1 -->
-                    <div class="timeline-item" data-aos="fade-up">
-                        <div class="timeline-number">1</div>
-                        <div class="timeline-content">
-                            <h3>QR ear tag applied <span class="badge">tamper‑resistant</span></h3>
-                            <p>Each vaccinated animal receives a durable, weatherproof QR ear tag with a unique digital identity. The tag is scanned at the point of application to link it to the animal's profile.</p>
-                            <div class="feature-list">
-                                <span><i class="fas fa-check-circle"></i> Unique ID per animal</span>
-                                <span><i class="fas fa-check-circle"></i> Tamper‑proof</span>
-                                <span><i class="fas fa-check-circle"></i> Weather resistant</span>
-                            </div>
-                            <div class="step-visual">
-                                <div class="visual-thumb"><i class="fas fa-cow"></i><br>tag</div>
-                                <div class="visual-thumb"><i class="fas fa-qrcode"></i><br>QR close</div>
-                                <div class="visual-thumb"><i class="fas fa-syringe"></i><br>vaccination</div>
-                            </div>
+                <div class="hero-grid">
+                    <div class="hero-content" data-aos="fade-right">
+                        <div class="hero-badge"><span class="badge-pulse"></span> National FMD programme · QR-tagged</div>
+                        <h1 class="hero-title">From ear tag to national dashboard: <span class="text-gradient-red">proven FMD‑negative</span> by QR identity</h1>
+                        <p class="hero-description">Step 1: every vaccinated animal receives a unique, tamper-resistant QR ear tag. Scan to retrieve FMD‑negative status, full vaccination history, and movement permits — all verified in real time.</p>
+                        <div class="stat-banner">
+                            <div class="stat-item"><span class="stat-value">847k</span><span class="stat-label">tagged cattle</span></div>
+                            <div class="stat-item"><span class="stat-value">100%</span><span class="stat-label">FMD‑negative in pilot</span></div>
+                            <div class="stat-item"><span class="stat-value">24h</span><span class="stat-label">trace complete</span></div>
+                        </div>
+                        <div class="hero-cta">
+                            <button id="heroScanBtn" class="btn btn-primary btn-large"><i class="fas fa-qrcode"></i> See QR tag in action</button>
+                            <a href="#" class="btn btn-outline btn-large">How it works</a>
+                        </div>
+                        <div style="display: flex; gap: 1.2rem; margin-top: 1.8rem;">
+                            <span><i class="fas fa-check-circle" style="color:#117f3a;"></i> POPIA compliant</span>
+                            <span><i class="fas fa-check-circle" style="color:#117f3a;"></i> DALRRD ready</span>
                         </div>
                     </div>
-
-                    <!-- step 2 -->
-                    <div class="timeline-item" data-aos="fade-up" data-aos-delay="100">
-                        <div class="timeline-number">2</div>
-                        <div class="timeline-content">
-                            <h3>Vaccination & health registry</h3>
-                            <p>Vet or technician records vaccine type, batch number, date, and booster due date directly into the system via mobile app. All data is linked to the animal's QR code.</p>
-                            <div class="feature-list">
-                                <span><i class="fas fa-check-circle"></i> Vaccine batch tracking</span>
-                                <span><i class="fas fa-check-circle"></i> Booster reminders</span>
-                                <span><i class="fas fa-check-circle"></i> Vet credentials</span>
-                            </div>
-                            <div class="step-visual">
-                                <div class="visual-thumb"><i class="fas fa-notes-medical"></i><br>registry</div>
-                                <div class="visual-thumb"><i class="fas fa-file-invoice"></i><br>digital profile</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- step 3 -->
-                    <div class="timeline-item" data-aos="fade-up" data-aos-delay="200">
-                        <div class="timeline-number">3</div>
-                        <div class="timeline-content">
-                            <h3>Daily health monitoring <span class="badge">farmer reports</span></h3>
-                            <p>Farmers scan the QR code daily and submit a short health check (eating, mobility, symptoms). Photos can be uploaded for veterinary review.</p>
-                            <div class="feature-list">
-                                <span><i class="fas fa-check-circle"></i> Symptom checker</span>
-                                <span><i class="fas fa-check-circle"></i> Photo upload</span>
-                                <span><i class="fas fa-check-circle"></i> Early alert</span>
-                            </div>
-                            <div class="step-visual">
-                                <div class="visual-thumb"><i class="fas fa-mobile-alt"></i><br>app</div>
-                                <div class="visual-thumb"><i class="fas fa-camera"></i><br>photo</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- step 4 -->
-                    <div class="timeline-item" data-aos="fade-up" data-aos-delay="300">
-                        <div class="timeline-number">4</div>
-                        <div class="timeline-content">
-                            <h3>Movement & traceability</h3>
-                            <p>Every time an animal moves (auction, feedlot, abattoir) the QR code is scanned. The system logs origin, destination, and timestamp. Non‑compliant animals are prevented from moving.</p>
-                            <div class="feature-list">
-                                <span><i class="fas fa-check-circle"></i> Permit enforcement</span>
-                                <span><i class="fas fa-check-circle"></i> GPS location</span>
-                                <span><i class="fas fa-check-circle"></i> Blockchain anchor</span>
-                            </div>
-                            <div class="step-visual">
-                                <div class="visual-thumb"><i class="fas fa-truck"></i><br>transport</div>
-                                <div class="visual-thumb"><i class="fas fa-qrcode"></i><br>scan gate</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- step 5 -->
-                    <div class="timeline-item" data-aos="fade-up" data-aos-delay="400">
-                        <div class="timeline-number">5</div>
-                        <div class="timeline-content">
-                            <h3>National dashboard & alerts</h3>
-                            <p>All data flows into a central command center. Veterinary authorities see real‑time FMD status, vaccination coverage, and outbreak hotspots. Automatic alerts for suspected cases.</p>
-                            <div class="feature-list">
-                                <span><i class="fas fa-check-circle"></i> Real‑time map</span>
-                                <span><i class="fas fa-check-circle"></i> Risk heatmap</span>
-                                <span><i class="fas fa-check-circle"></i> Export reports</span>
-                            </div>
-                            <div class="step-visual">
-                                <div class="visual-thumb"><i class="fas fa-chart-line"></i><br>dashboard</div>
-                                <div class="visual-thumb"><i class="fas fa-bell"></i><br>alerts</div>
-                            </div>
+                    <div class="hero-visual" data-aos="fade-left">
+                        <div class="hero-image-placeholder">
+                            <img src="/assets/IMG-20260309-WA0005.jpg" alt="Hero visual placeholder" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22400%22%20viewBox%3D%220%200%20600%20400%22%3E%3Crect%20width%3D%22600%22%20height%3D%22400%22%20fill%3D%22%23bc1c2e22%22%2F%3E%3Ctext%20x%3D%2230%22%20y%3D%22200%22%20font-family%3D%22Inter%22%20font-size%3D%2224%22%20fill%3D%22%239f1626%22%3E📸%20QR%20tag%20scan%20visual%3C%2Ftext%3E%3C%2Fsvg%3E';">
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- detailed sub‑process cards (system components) -->
+        <!-- process grid ... (unchanged, keep as is) -->
         <div class="container">
-            <div style="text-align: center; margin: 2rem 0 3rem;">
-                <span class="badge" style="background: rgba(188,28,46,0.08);">system components</span>
-                <h2 style="font-size: 2.2rem; font-weight: 700; margin-top: 0.5rem;">What makes the QR system work</h2>
+            <div class="section-header">
+                <span class="section-tag">national digital livestock ecosystem</span>
+                <h2 class="subsection-title">QR‑code identification from farm to export</h2>
             </div>
-            <div class="sub-process-grid">
-                <div class="sub-card">
-                    <div class="sub-icon"><img src="/assets/images/qr-ear-tag.jpg" alt="tag" style="width:100%; height:100%; object-fit:cover; border-radius:30px;"></div>
-                    <h4>QR ear tag</h4>
-                    <p>Unique ID per animal, laser‑etched, withstands mud, rain, and sun. Scannable with any smartphone.</p>
+            <div class="process-grid">
+                <div class="process-card">
+                    <div class="process-icon">
+                        <img src="/assets/qrcode.jpg" alt="QR ear tag" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E📱%3C%2Ftext%3E%3C%2Fsvg%3E';">
+                    </div>
+                    <h4>1. QR ear tag</h4>
+                    <p>Unique ID per bovine, weather-resistant, tamper‑proof, scanned via smartphone.</p>
                 </div>
-                <div class="sub-card">
-                    <div class="sub-icon"><img src="/assets/images/vaccination-registry.jpg" alt="vaccination registry" style="width:100%; height:100%; object-fit:cover; border-radius:30px;"></div>
-                    <h4>Vaccination registry</h4>
-                    <p>Secure database storing vaccine batch, date, and next booster. Automatically flags overdue animals.</p>
+                <div class="process-card">
+                    <div class="process-icon">
+                        <img src="/assets/Cattle-vaccination-c-AdobeStock_289582852-web-1024x577.jpg" alt="Vaccination registry" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E💉%3C%2Ftext%3E%3C%2Fsvg%3E';">
+                    </div>
+                    <h4>2. Vaccination registry</h4>
+                    <p>Vaccine batch, vet ID, booster schedule — all linked to QR.</p>
                 </div>
-                <div class="sub-card">
-                    <div class="sub-icon"><img src="/assets/images/daily-health-check.jpg" alt="health check" style="width:100%; height:100%; object-fit:cover; border-radius:30px;"></div>
-                    <h4>Daily health check</h4>
-                    <p>Farmer scans and answers 5 simple health questions. Machine learning flags unusual patterns.</p>
+                <div class="process-card">
+                    <div class="process-icon">
+                        <img src="/assets/negative.jpg" alt="Daily health check" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E🐄%3C%2Ftext%3E%3C%2Fsvg%3E';">
+                    </div>
+                    <h4>3. Daily health check</h4>
+                    <p>Farmer scans & submits symptoms (photos, mobility) → early alert.</p>
                 </div>
-                <div class="sub-card">
-                    <div class="sub-icon"><img src="/assets/images/movement-scan.jpg" alt="movement" style="width:100%; height:100%; object-fit:cover; border-radius:30px;"></div>
-                    <h4>Movement control</h4>
-                    <p>Permits are auto‑generated for FMD‑negative animals. Positive or suspect animals are blocked.</p>
-                </div>
-                <div class="sub-card">
-                    <div class="sub-icon"><img src="/assets/images/dashboard-preview.jpg" alt="dashboard" style="width:100%; height:100%; object-fit:cover; border-radius:30px;"></div>
-                    <h4>National dashboard</h4>
-                    <p>Real‑time view of all tagged animals, outbreak zones, and vaccination coverage by district.</p>
-                </div>
-                <div class="sub-card">
-                    <div class="sub-icon"><i class="fas fa-shield-alt" style="font-size:2rem; color:var(--primary);"></i></div>
-                    <h4>Blockchain anchor</h4>
-                    <p>Each scan and event is hashed on Hedera, providing immutable proof for auditors and trade partners.</p>
+                <div class="process-card">
+                    <div class="process-icon">
+                        <img src="/assets/negative.jpg" alt="Movement scan" style="width:100%; height:100%; object-fit:cover; border-radius:30px;" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2270%22%20height%3D%2270%22%20viewBox%3D%220%200%2070%2070%22%3E%3Crect%20width%3D%2270%22%20height%3D%2270%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2210%22%20y%3D%2245%22%20fill%3D%22%23fff%22%20font-size%3D%2220%22%3E🚛%3C%2Ftext%3E%3C%2Fsvg%3E';">
+                    </div>
+                    <h4>4. Movement scan</h4>
+                    <p>Auctions, abattoirs, transport — scan logs location, prevents non‑compliant moves.</p>
                 </div>
             </div>
         </div>
 
-        <!-- how it works summary (three pillars) -->
+        <!-- dashboard image -->
         <div class="container">
-            <div class="how-it-works">
-                <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem; text-align: center;">Three pillars of digital biosecurity</h3>
-                <div class="how-grid">
-                    <div class="how-item">
-                        <i class="fas fa-id-card"></i>
-                        <h4>1. Unique digital identity</h4>
-                        <p>Every animal gets a tamper‑proof QR code that links to a permanent health record.</p>
-                    </div>
-                    <div class="how-item">
-                        <i class="fas fa-syringe"></i>
-                        <h4>2. Verified vaccination</h4>
-                        <p>Vaccine batch, date, and vet are recorded at source – no paper, no fraud.</p>
-                    </div>
-                    <div class="how-item">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <h4>3. Live traceability</h4>
-                        <p>From farm to abattoir, every movement is scanned and geolocated.</p>
-                    </div>
+            <div class="dashboard-peek">
+                <img src="/assets/IMG_20260309_130845.jpg" alt="FMD Dashboard Preview" class="dashboard-image" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22800%22%20height%3D%22300%22%20viewBox%3D%220%200%20800%20300%22%3E%3Crect%20width%3D%22800%22%20height%3D%22300%22%20fill%3D%22%231b3b4f%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%22160%22%20font-family%3D%22Inter%22%20font-size%3D%2228%22%20fill%3D%22%23fff%22%3E📊%20FMD%20DASHBOARD%20PREVIEW%3C%2Ftext%3E%3C%2Fsvg%3E';">
+            </div>
+        </div>
+
+        <!-- rest of content (unchanged) -->
+        <div class="container" style="text-align:center; margin: 4rem auto;">
+            <span class="section-tag">from pilot to national scale</span>
+            <h2 class="subsection-title">QR-code vaccination roll‑out</h2>
+            <div style="display: flex; justify-content: center; gap: 3rem; background: white; border-radius: 60px; padding: 1.5rem 2.5rem; width: fit-content; margin: 2rem auto;">
+                <div><span style="font-weight:800;">phase 1</span> ⬩ 50k tags ⬩ FMD‑negative corridor</div>
+                <div><span style="font-weight:800;">phase 2</span> ⬩ 2M tags ⬩ 9 provinces</div>
+                <div><span style="font-weight:800;">phase 3</span> ⬩ export dashboard</div>
+            </div>
+            <a href="#" class="btn btn-primary btn-large" style="margin-top:1rem;">📄 download technical brief</a>
+        </div>
+
+        <!-- contact card -->
+        <div class="container" style="background: white; border-radius: 48px; padding: 3rem; box-shadow: 0 20px 30px -20px #00000030; margin-bottom: 4rem;">
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: center;">
+                <div style="flex: 2;">
+                    <h2 style="font-size: 2.4rem; font-weight: 700;">Secure sovereign data · POPIA</h2>
+                    <p style="font-size: 1.2rem; color: #2e4960;">Government‑owned, role‑based access, every QR scan creates an auditable trail.</p>
+                    <div style="margin-top: 2rem;"><i class="fas fa-shield-alt" style="color: var(--primary);"></i> Blockchain anchored (Hedera) · movement permits auto‑revoked if FMD suspect</div>
                 </div>
-                <div style="text-align: center; margin-top: 2.5rem;">
-                    <span style="background: #1f3a57; padding: 0.5rem 2rem; border-radius: 60px; color: #bcd3f0;"><i class="fas fa-qrcode"></i> Over 1.2 million animals already QR‑tagged in pilot</span>
+                <div style="flex: 1; background: #f1f6fc; border-radius: 36px; padding: 2rem; text-align: center;">
+                    <i class="fas fa-qrcode" style="font-size: 4rem; color:var(--primary);"></i>
+                    <h3>Phase 1 pilot</h3>
+                    <p>R28M · 120% IRR · Q3 2025</p>
+                    <a href="mailto:tshepang.technicorns@outlook.com" class="btn btn-primary">contact Tech Unicorns</a>
                 </div>
             </div>
         </div>
 
-        <!-- final benefits / call to action -->
-        <div class="container" style="margin-bottom: 4rem;">
-            <div style="background: white; border-radius: 48px; padding: 3rem; display: flex; flex-wrap: wrap; gap: 2rem; align-items: center; box-shadow: 0 20px 40px -20px #00000030;">
-                <div style="flex: 1; min-width: 250px;">
-                    <h3 style="font-size: 2rem; font-weight: 700;">Ready to implement?</h3>
-                    <p style="font-size: 1.1rem; color:#2e4960;">The QR‑code livestock system is proven, POPIA‑compliant, and ready for national rollout.</p>
-                    <div style="margin-top: 1.5rem;">
-                        <a href="#" class="btn btn-primary btn-large"><i class="fas fa-download"></i> Download process PDF</a>
-                        <a href="dashboard.html" class="btn btn-outline btn-large" style="margin-left: 1rem;">View live map</a>
-                    </div>
+        <footer class="footer">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <span>National Digital Livestock Vaccination & Health Monitoring System</span>
+                    <span style="color:#bc1c2e;">⬩ QR per animal ⬩ FMD negative proof</span>
+                    <span> Tshepang Masilo · <a href="mailto:tshepang.technicorns@outlook.com" style="color:white;">tshepang.technicorns@outlook.com</a></span>
                 </div>
-                <div style="flex: 0 0 auto; background: #f1f6fc; border-radius: 36px; padding: 1.5rem 2.5rem;">
-                    <i class="fas fa-qrcode" style="font-size: 3rem; color:var(--primary);"></i>
-                    <div style="font-weight: 800; margin-top: 0.5rem;">Phase 1 pilot</div>
-                    <div>R28M · 120% IRR</div>
+                <hr style="border-color:#2d3f55; margin: 2rem 0;">
+                <div style="display: flex; gap: 2rem; font-size:0.9rem;">
+                    <span>© Tech Unicorns · all rights reserved</span>
+                    <span>POPIA compliant</span>
+                    <span>DALRRD ready</span>
                 </div>
             </div>
-        </div>
+        </footer>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                <span>National Digital Livestock Vaccination & Health Monitoring System</span>
-                <span style="color:#bc1c2e;">⬩ QR per animal ⬩ FMD negative proof</span>
-                <span> Tshepang Masilo · <a href="mailto:tshepang.technicorns@outlook.com" style="color:white;">tshepang.technicorns@outlook.com</a></span>
-            </div>
-            <hr style="border-color:#2d3f55; margin: 2rem 0;">
-            <div style="display: flex; gap: 2rem; font-size:0.9rem;">
-                <span>© Tech Unicorns · all rights reserved</span>
-                <span>POPIA compliant</span>
-                <span>DALRRD ready</span>
-            </div>
-        </div>
-    </footer>
-
+    <!-- scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
+        // mini map (same as original)
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapEl = document.getElementById('miniLivestockMap');
+            if (mapEl) {
+                const map = L.map(mapEl, { center: [-28.4793, 24.6986], zoom: 5, zoomControl: false, attributionControl: false, scrollWheelZoom: false });
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+                const farms = [ { lat: -25.7689, lng: 29.4648 }, { lat: -28.2308, lng: 28.3073 }, { lat: -26.9569, lng: 24.7284 }, { lat: -23.9045, lng: 29.4688 } ];
+                farms.forEach(f => {
+                    L.marker([f.lat, f.lng], {
+                        icon: L.divIcon({ className: 'custom-marker', html: '<div style="background:#bc1c2e; width:12px; height:12px; border-radius:50%; border:2px solid white;"></div>', iconSize: [12,12] })
+                    }).addTo(map);
+                });
+            }
+        });
+
+        // ---------- CAMERA LOGIC ----------
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('cameraFeed');
+        const placeholder = document.getElementById('cameraPlaceholder');
+        const closeBtn = document.getElementById('closeCamera');
+        const scanButtons = [document.getElementById('scanDemoBtn'), document.getElementById('heroScanBtn')];
+
+        let stream = null;
+
+        function stopStream() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function showCamera() {
+            modal.style.display = 'flex';
+            video.style.display = 'none';
+            placeholder.style.display = 'flex';  // show placeholder while starting
+
+            // request camera
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }) // use back camera if available
+                .then(mediaStream => {
+                    stream = mediaStream;
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play().then(() => {
+                            // hide placeholder, show video
+                            placeholder.style.display = 'none';
+                            video.style.display = 'block';
+                        }).catch(e => {
+                            placeholder.innerHTML = `<i class="fas fa-exclamation-triangle"></i> could not play video`;
+                        });
+                    };
+                })
+                .catch(err => {
+                    console.warn('Camera error:', err);
+                    placeholder.innerHTML = `
+                        <i class="fas fa-exclamation-triangle" style="font-size:3rem;"></i>
+                        <span>Camera access denied or not available.</span>
+                        <span style="font-size:0.9rem;">(simulated demo — in real app QR would be detected)</span>
+                    `;
+                    // Keep placeholder visible with message
+                });
+        }
+
+        function hideCamera() {
+            modal.style.display = 'none';
+            stopStream();
+            // reset placeholder for next time
+            placeholder.innerHTML = `
+                <i class="fas fa-camera" style="font-size: 4rem; opacity: 0.6;"></i>
+                <div class="mock-scan-line"></div>
+                <span>waiting for camera …</span>
+            `;
+            placeholder.style.display = 'flex';
+            video.style.display = 'none';
+        }
+
+        // event listeners for both buttons
+        scanButtons.forEach(btn => {
+            if (btn) btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showCamera();
+            });
+        });
+
+        closeBtn.addEventListener('click', hideCamera);
+
+        // click outside modal? optional: close if click on background
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideCamera();
+        });
+
+        // cleanup on page unload
+        window.addEventListener('beforeunload', stopStream);
     </script>
 </body>
 </html>
